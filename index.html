@@ -335,10 +335,32 @@
             }
             body {
                 height: auto;
-                padding: 4rem 0;
+                padding: 2rem 0;
                 overflow-y: auto;
             }
             .header h1 { font-size: 2.2rem; }
+            .header { margin-bottom: 2rem; }
+            .role-card { min-height: 320px; }
+            .card-front, .login-form { padding: 1.5rem; }
+            .icon-box { width: 60px; height: 60px; font-size: 2rem; margin-bottom: 1rem; }
+            .role-card h2, .login-form h3 { font-size: 1.25rem; }
+            .role-card p { font-size: 0.85rem; margin-bottom: 1rem; }
+            .container { padding: 1rem; }
+            .footer { margin-top: 2rem; font-size: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.7rem; }
+            .header p { font-size: 0.9rem; }
+            .portal-grid { max-width: 100%; gap: 1.25rem; }
+            .role-card { min-height: 280px; }
+            .card-front, .login-form { padding: 1.25rem; }
+            .icon-box { width: 50px; height: 50px; font-size: 1.6rem; border-radius: 14px; }
+            .role-card h2 { font-size: 1.1rem; }
+            .role-card p { font-size: 0.8rem; }
+            .input-group input { padding: 10px 12px; font-size: 0.85rem; }
+            .btn-login { padding: 10px; }
+            .container { padding: 0.75rem; }
         }
     </style>
 </head>
