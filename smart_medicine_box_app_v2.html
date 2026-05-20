@@ -339,8 +339,8 @@ nav{flex:1;padding:0.5rem 0.75rem}
         </div>
         <div class="alert-banner alert-green"><i class="ti ti-check"></i><span>Patient took morning dose at 08:05 AM today</span></div>
         <div class="grid-4">
-          <div class="stat blue"><div class="stat-label"><i class="ti ti-heart-rate-monitor"></i>Heart Rate</div><div class="stat-value">72</div><div class="stat-sub">bpm — Normal</div></div>
-          <div class="stat green"><div class="stat-label"><i class="ti ti-temperature"></i>Temperature</div><div class="stat-value">36.7</div><div class="stat-sub">°C — Normal</div></div>
+          <div class="stat blue"><div class="stat-label"><i class="ti ti-heart-rate-monitor"></i>Heart Rate</div><div class="stat-value" id="fBPM">--</div><div class="stat-sub" id="fBPMSub">bpm — Syncing</div></div>
+          <div class="stat green"><div class="stat-label"><i class="ti ti-temperature"></i>Temperature</div><div class="stat-value" id="fTemp">--</div><div class="stat-sub" id="fTempSub">°C — Syncing</div></div>
           <div class="stat blue"><div class="stat-label"><i class="ti ti-check"></i>Taken Today</div><div class="stat-value">2/5</div><div class="stat-sub">doses taken</div></div>
           <div class="stat amber"><div class="stat-label"><i class="ti ti-clock"></i>Next Dose</div><div class="stat-value" style="font-size:16px;margin-top:4px">14:00</div><div class="stat-sub">Metformin 500mg</div></div>
         </div>
@@ -352,8 +352,8 @@ nav{flex:1;padding:0.5rem 0.75rem}
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title"><i class="ti ti-activity"></i>Live Vitals</div></div>
-            <div class="vital-row"><span class="vital-name"><i class="ti ti-heart-rate-monitor"></i>Heart Rate</span><span class="vital-val">72<span class="vital-unit">bpm</span></span></div>
-            <div class="vital-row"><span class="vital-name"><i class="ti ti-temperature"></i>Temperature</span><span class="vital-val">36.7<span class="vital-unit">°C</span></span></div>
+            <div class="vital-row"><span class="vital-name"><i class="ti ti-heart-rate-monitor"></i>Heart Rate</span><span class="vital-val"><span id="fVitalBPM">--</span><span class="vital-unit">bpm</span></span></div>
+            <div class="vital-row"><span class="vital-name"><i class="ti ti-temperature"></i>Temperature</span><span class="vital-val"><span id="fVitalTemp">--</span><span class="vital-unit">°C</span></span></div>
             <div id="ecgResultC" style="background:var(--gray); padding: 10px; border-radius: var(--radius); text-align: center; font-family: 'DM Mono', monospace; color: var(--text3); margin: 10px 0; font-size: 12px">---</div>
             <div class="ecg-status" id="ecgStatusC"><i class="ti ti-plug-off"></i>Standby</div>
             <button class="btn-ecg" onclick="startECG('C')"><i class="ti ti-player-play"></i>Start ECG Scan</button>
@@ -454,8 +454,8 @@ nav{flex:1;padding:0.5rem 0.75rem}
         <div class="card">
           <div class="card-header"><div class="card-title"><i class="ti ti-activity"></i>Health Summary</div></div>
           <div class="grid-3" style="margin-top:0.5rem">
-            <div class="stat blue"><div class="stat-label">Avg Heart Rate</div><div class="stat-value">74</div><div class="stat-sub">bpm — 7 day avg</div></div>
-            <div class="stat green"><div class="stat-label">Avg Temperature</div><div class="stat-value">36.6</div><div class="stat-sub">°C — Normal</div></div>
+            <div class="stat blue"><div class="stat-label">Avg Heart Rate</div><div class="stat-value" id="dAvgBPM">--</div><div class="stat-sub">bpm — cloud avg</div></div>
+            <div class="stat green"><div class="stat-label">Avg Temperature</div><div class="stat-value" id="dAvgTemp">--</div><div class="stat-sub">°C — cloud avg</div></div>
             <div class="stat amber"><div class="stat-label">Avg SpO₂</div><div class="stat-value">97.8%</div><div class="stat-sub">7 day avg</div></div>
           </div>
           <div style="background:var(--gray);border-radius:var(--radius);padding:1rem;font-size:13px;color:var(--text2);line-height:1.7;margin-top:1rem">
@@ -622,7 +622,8 @@ function startECG(id) {
   setTimeout(function() {
     status.innerHTML = '<i class="ti ti-activity"></i> Data sync complete (Simulated)';
     status.classList.remove('error');
-    result.innerHTML = '<span style="color:var(--teal)">NORMAL SINUS RHYTHM</span><br><small style="font-size:10px">72 BPM · 98% Confidence</small>';
+    const _bpm = document.getElementById('liveBPM')?.textContent || '--';
+    result.innerHTML = '<span style="color:var(--teal)">NORMAL SINUS RHYTHM</span><br><small style="font-size:10px">' + _bpm + ' BPM · Live Cloud Data</small>';
     result.style.color = 'var(--text)';
   }, 2000);
 }
@@ -714,9 +715,26 @@ function updateUIFromData(data, isFromCloud) {
   const pulseStatusEl = document.getElementById('pulseStatus');
   const cloudStatusEl = document.getElementById('cloudStatus');
 
+  // Patient Wristband
   if (bpmEl) bpmEl.textContent = data.bpm;
   if (tempEl) tempEl.textContent = data.temperature;
   if (ecgBpmEl) ecgBpmEl.textContent = data.bpm;
+  
+  // Family Dashboard stats
+  const fBPM = document.getElementById('fBPM');
+  const fTemp = document.getElementById('fTemp');
+  const fBPMSub = document.getElementById('fBPMSub');
+  const fTempSub = document.getElementById('fTempSub');
+  if (fBPM) fBPM.textContent = data.bpm;
+  if (fTemp) fTemp.textContent = data.temperature;
+  if (fBPMSub) fBPMSub.textContent = 'bpm — ' + (data.bpm > 130 || data.bpm < 55 ? 'Abnormal' : 'Normal');
+  if (fTempSub) fTempSub.textContent = '°C — ' + (data.temperature > 38.0 ? 'Fever' : 'Normal');
+
+  // Family Live Vitals card
+  const fVBPM = document.getElementById('fVitalBPM');
+  const fVTemp = document.getElementById('fVitalTemp');
+  if (fVBPM) fVBPM.textContent = data.bpm;
+  if (fVTemp) fVTemp.textContent = data.temperature;
   
   if (pulseStatusEl) {
     if (data.pulse === 'Detected') {
@@ -830,6 +848,16 @@ function updateHistoryUI(data) {
       const time = new Date(row.timestamp).toLocaleTimeString();
       return `<div style="padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.05);">[${time}] <strong style="color:var(--blue)">BPM: ${row.bpm}</strong> | Temp: ${row.temperature}°C | Pulse: ${row.pulse_status}</div>`;
     }).join('');
+  }
+  
+  // Compute cloud averages for Doctor Health Summary
+  if (data.length > 0) {
+    const avgBPM = Math.round(data.reduce((s, r) => s + (r.bpm || 0), 0) / data.length);
+    const avgTemp = (data.reduce((s, r) => s + (r.temperature || 0), 0) / data.length).toFixed(1);
+    const dAvgBPM = document.getElementById('dAvgBPM');
+    const dAvgTemp = document.getElementById('dAvgTemp');
+    if (dAvgBPM) dAvgBPM.textContent = avgBPM;
+    if (dAvgTemp) dAvgTemp.textContent = avgTemp;
   }
   
   const ctx = document.getElementById('historyChart');
