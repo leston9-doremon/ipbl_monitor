@@ -562,6 +562,10 @@ function login() {
     document.getElementById('errMsg').classList.add('show');
     return;
   }
+  
+  // Save role so it persists on reload
+  localStorage.setItem('selectedRole', currentRole);
+  
   var r = ROLES[currentRole];
   document.getElementById('roleLabel').textContent = r.label;
   document.getElementById('topbarAvatar').textContent = r.avatar;
