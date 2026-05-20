@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBox Pro | Smart Health Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        :root {
+            --primary: #1a5fa8;
+            --primary-light: #e8f1fb;
+            --secondary: #0a7c5c;
+            --accent: #f59e0b;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('bg.png') no-repeat center center/cover;
+            filter: blur(5px) brightness(0.6);
+            transform: scale(1.1);
+            animation: panBg 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes panBg {
+            from { transform: scale(1.1) translate(0, 0); }
+            to { transform: scale(1.1) translate(-20px, -20px); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .role-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 0;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s, opacity 0.5s;
+            position: relative;
+            min-height: 400px;
+            box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            opacity: 1; /* Removed initial opacity 0 and forwards animation to prevent transform locking */
+        }
+
+        .role-card.flipped {
+            /* Transform handled by children */
+        }
+
+        .card-front, .login-form {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+            border-radius: 24px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-front {
+            z-index: 2;
+            transform: rotateY(0deg);
+        }
+
+        .login-form {
+            z-index: 1;
+            transform: rotateY(180deg);
+            background: white;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .flipped .card-front {
+            transform: rotateY(-180deg);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .flipped .login-form {
+            transform: rotateY(0deg);
+            z-index: 2;
+            pointer-events: auto;
+        }
+
+        .role-card:not(.flipped):hover {
+            transform: translateY(-15px) scale(1.02);
+            background: white;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2;
+        }
+
+        .role-card:hover::before {
+            opacity: 1;
+        }
+
+        .role-card.patient::before { background: #3b82f6; }
+        .role-card.family::before { background: #10b981; }
+        .role-card.doctor::before { background: #f59e0b; }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .patient .icon-box { background: #eff6ff; color: #1d4ed8; }
+        .family .icon-box { background: #ecfdf5; color: #059669; }
+        .doctor .icon-box { background: #fffbeb; color: #d97706; }
+
+        .role-card:hover .icon-box {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .role-card h2, .login-form h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .role-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-enter {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .patient:hover .btn-enter { background: #2563eb; color: white; }
+        .family:hover .btn-enter { background: #10b981; color: white; }
+        .doctor:hover .btn-enter { background: #f59e0b; color: white; }
+
+        /* Form Styles */
+        .input-group {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .patient .btn-login { background: #2563eb; }
+        .family .btn-login { background: #10b981; }
+        .doctor .btn-login { background: #f59e0b; }
+
+        .btn-login:hover { opacity: 0.9; }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        .btn-back:hover { color: var(--text-main); }
+
+        .error-msg {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .demo-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            margin-top: 4rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 900px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            body {
+                height: auto;
+                padding: 4rem 0;
+                overflow-y: auto;
+            }
+            .header h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-image"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>MediBox Pro</h1>
+            <p>Select your access profile to continue to the dashboard</p>
+        </header>
+
+        <div class="portal-grid">
+            <!-- Patient Card -->
+            <div class="role-card patient" id="card-patient" onclick="if(!this.classList.contains('flipped')) showLogin('patient')">
+                <div class="card-front">
+                    <div class="icon-box">
+                        <i class="ti ti-user-heart"></i>
+                    </div>
+                    <h2>Patient Portal</h2>
+                    <p>Manage your prescriptions, track vitals, and view your adherence stats.</p>
+                    <div class="btn-enter">
+                        Enter Portal <i class="ti ti-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="login-form" id="form-patient">
+                    <h3>Patient Login</h3>
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="user-patient" placeholder="patient">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="pass-patient" placeholder="••••••••">
+                    </div>
+                    <div class="error-msg" id="err-patient">Invalid credentials</div>
+                    <button class="btn-login" onclick="login('patient')">Sign In</button>
+                    <p class="demo-hint">Demo: patient / pass123 (<a href="#" onclick="autoFill('patient')" style="color:var(--primary); text-decoration:none;">Auto-fill</a>)</p>
+                    <button class="btn-back" onclick="showFront('patient', event)">← Back</button>
+                </div>
+            </div>
+
+            <!-- Family Card -->
+            <div class="role-card family" id="card-family" onclick="if(!this.classList.contains('flipped')) showLogin('family')">
+                <div class="card-front">
+                    <div class="icon-box">
+                        <i class="ti ti-users"></i>
+                    </div>
+                    <h2>Family / Caregiver</h2>
+                    <p>Monitor your loved ones, set remote reminders, and receive real-time SOS alerts.</p>
+                    <div class="btn-enter">
+                        Enter Portal <i class="ti ti-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="login-form" id="form-family">
+                    <h3>Caregiver Login</h3>
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="user-family" placeholder="family">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="pass-family" placeholder="••••••••">
+                    </div>
+                    <div class="error-msg" id="err-family">Invalid credentials</div>
+                    <button class="btn-login" onclick="login('family')">Sign In</button>
+                    <p class="demo-hint">Demo: family / pass123 (<a href="#" onclick="autoFill('family')" style="color:var(--primary); text-decoration:none;">Auto-fill</a>)</p>
+                    <button class="btn-back" onclick="showFront('family', event)">← Back</button>
+                </div>
+            </div>
+
+            <!-- Doctor Card -->
+            <div class="role-card doctor" id="card-doctor" onclick="if(!this.classList.contains('flipped')) showLogin('doctor')">
+                <div class="card-front">
+                    <div class="icon-box">
+                        <i class="ti ti-stethoscope"></i>
+                    </div>
+                    <h2>Doctor Console</h2>
+                    <p>Review clinical reports, analyze patient adherence, and adjust treatment plans.</p>
+                    <div class="btn-enter">
+                        Enter Portal <i class="ti ti-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="login-form" id="form-doctor">
+                    <h3>Doctor Login</h3>
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="user-doctor" placeholder="doctor">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="pass-doctor" placeholder="••••••••">
+                    </div>
+                    <div class="error-msg" id="err-doctor">Invalid credentials</div>
+                    <button class="btn-login" onclick="login('doctor')">Sign In</button>
+                    <p class="demo-hint">Demo: doctor / pass123 (<a href="#" onclick="autoFill('doctor')" style="color:var(--primary); text-decoration:none;">Auto-fill</a>)</p>
+                    <button class="btn-back" onclick="showFront('doctor', event)">← Back</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 MediBox Health Technologies • Secure Healthcare Access
+        </footer>
+    </div>
+
+    <script>
+        function showLogin(role) {
+            document.querySelectorAll('.role-card').forEach(function(c) { c.classList.remove('flipped'); });
+            document.getElementById('card-' + role).classList.add('flipped');
+        }
+
+        function showFront(role, event) {
+            if (event) event.stopPropagation();
+            document.getElementById('card-' + role).classList.remove('flipped');
+        }
+
+        function autoFill(role) {
+            document.getElementById('user-' + role).value = role;
+            document.getElementById('pass-' + role).value = 'pass123';
+        }
+
+        function login(role) {
+            const user = document.getElementById('user-' + role).value.trim().toLowerCase();
+            const pass = document.getElementById('pass-' + role).value.trim();
+            const err = document.getElementById('err-' + role);
+
+            // Case-insensitive demo validation
+            if (user === role.toLowerCase() && pass === 'pass123') {
+                localStorage.setItem('selectedRole', role);
+                window.location.href = 'smart_medicine_box_app_v2.html';
+            } else {
+                err.style.display = 'block';
+                setTimeout(() => { err.style.display = 'none'; }, 3000);
+            }
+        }
+
+        // Prevent flip when clicking inside the form inputs
+        document.querySelectorAll('.login-form').forEach(function(form) {
+            form.addEventListener('click', function(e) { e.stopPropagation(); });
+        });
+    </script>
+</body>
+</html>
