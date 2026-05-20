@@ -648,7 +648,7 @@ function initWaveforms() {
 // --- CLOUD BACKEND (SUPABASE) ARCHITECTURE ---
 const supabaseUrl = 'https://omfldpqksqlvoeewasbv.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZmxkcHFrc3Fsdm9lZXdhc2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTQ1MjQsImV4cCI6MjA5NDc5MDUyNH0.9bPqQkxDZ0a0AoJirDJoEL-LNroKbJAEIPQzqjYDBCY';
-const supabase = (window.supabase && supabaseUrl !== 'YOUR_SUPABASE_URL') 
+const supabaseClient = (window.supabase && supabaseUrl !== 'YOUR_SUPABASE_URL') 
   ? window.supabase.createClient(supabaseUrl, supabaseKey) 
   : null;
 
@@ -668,9 +668,9 @@ function fetchESP32Data() {
 
 // 2. Read latest data from Supabase (Sole Source of Truth)
 async function fetchCloudData() {
-  if (!supabase) return;
+  if (!supabaseClient) return;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('health_readings')
       .select('*')
       .order('timestamp', { ascending: false })
